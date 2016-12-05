@@ -5,10 +5,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -20,38 +19,76 @@ public class RedScare {
 
 
         List<String> allFiles = getInputs();
-        for (int i = 0; i < allFiles.size(); i++) {
-            System.out.print(allFiles.get(i));
-            ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i));
-            //none(rw);
+        List<String> results = new ArrayList<>();
 
-            System.out.println("\t"+ none(rw)+" " +many(rw));
+        for (int i = 0; i < allFiles.size(); i++) {
+            // System.out.print(allFiles.get(i));
+            ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i));
+
+
+            results.add(allFiles.get(i) + " " + none(rw) + " " + some(rw) + " " + many(rw) + " " + few(rw) + " ");
+
+
         }
+        results.forEach(System.out::println);
+
 
     }
 
     public static String none(ReaderWriter rw) {
-        try {
-            if (rw.getP1Graph().isDirected()) {
 
-                BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(rw.getP1Graph().get(Graph.class), rw.getSource());
-                if (bfs.hasPathTo(rw.getSink())) {
-                    return String.valueOf(bfs.distTo(rw.getSink()));
-                }
-            } else {
+        if (rw.getP1Graph().isEmpty()) return "-";
 
-                BreadthFirstPaths bfs = new BreadthFirstPaths(rw.getP1Graph().get(Digraph.class), rw.getSource());
-                if (bfs.hasPathTo(rw.getSink())) {
-                    return String.valueOf(bfs.distTo(rw.getSink()));
-                }
+        if (rw.getP1Graph().isDirected()) {
+
+            BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(rw.getP1Graph().get(Graph.class), rw.getSource());
+            if (bfs.hasPathTo(rw.getSink())) {
+                return String.valueOf(bfs.distTo(rw.getSink()));
             }
+        } else {
 
-
-        } catch (RuntimeException e) {
-
+            BreadthFirstPaths bfs = new BreadthFirstPaths(rw.getP1Graph().get(Digraph.class), rw.getSource());
+            if (bfs.hasPathTo(rw.getSink())) {
+                return String.valueOf(bfs.distTo(rw.getSink()));
+            }
         }
         return "-";
     }
+
+    public static String some(ReaderWriter rw) {
+
+        if (!rw.getP2Graph().isEmpty() && !rw.getP2Graph().isDirected()) {
+
+            try {
+                for (Integer red : rw.getRedVertices()) {
+
+                    FlowNetwork g = rw.getP2Graph().get(FlowNetwork.class);
+                    Iterator<FlowEdge> iterator = g.edges().iterator();
+                    FlowNetwork gCopy = new FlowNetwork(g.V());
+                    while (iterator.hasNext()) {
+                        gCopy.addEdge(iterator.next());
+                    }
+
+                    FlowEdge e = new FlowEdge(red, rw.getP2newSink(), 2);
+                    gCopy.addEdge(e);
+
+                    FordFulkerson ff = new FordFulkerson(gCopy,
+                            rw.getP2newSource(), rw.getP2newSink());
+
+                    if ( Math.round(ff.value()) == 2) {
+                        return "true";
+                    }
+
+                }
+            } catch (RuntimeException e) {
+
+            }
+        } else {
+            return "?";
+        }
+        return "false";
+    }
+
 
     public static String many(ReaderWriter rw) {
         if (rw.getP1Graph().isDirected()) {
@@ -59,14 +96,8 @@ public class RedScare {
             BellmanFordSP bf = new BellmanFordSP(rw.getP3Graph().get(EdgeWeightedDigraph.class), rw.getSource());
             if (!bf.hasNegativeCycle()) {
                 if (bf.hasPathTo(rw.getSink())) {
-                    Iterable<DirectedEdge> path = bf.pathTo(rw.getSink());
-                    Iterator<DirectedEdge> iterator = path.iterator();
-                    int countRed = 0;
-                    while (iterator.hasNext()) {
-                        if (rw.getRedVertices().contains(iterator.next())) {
-                            countRed++;
-                        }
-                    }
+                    Iterator<DirectedEdge> iterator = bf.pathTo(rw.getSink()).iterator();
+                    int countRed = getCountRed(rw, iterator);
                     return String.valueOf(countRed);
                 } else {
                     return "-";
@@ -79,6 +110,54 @@ public class RedScare {
         return "?";
 
     }
+
+    private static int getCountRed(ReaderWriter rw, Iterator<DirectedEdge> iterator) {
+        int countRed = 0;
+        while (iterator.hasNext()) {
+            if (rw.getRedVertices().contains(iterator.next())) {
+                countRed++;
+            }
+        }
+        return countRed;
+    }
+
+    private static int getCountRedUndir(ReaderWriter rw, Iterator<Edge> iterator) {
+        int countRed = 0;
+        while (iterator.hasNext()) {
+            if (rw.getRedVertices().contains(iterator.next())) {
+                countRed++;
+            }
+        }
+        return countRed;
+    }
+
+    public static String few(ReaderWriter rw) {
+        if (rw.getP4Graph().isEmpty()) {
+            return "-";
+        }
+        if (rw.getP4Graph().isDirected()) {
+            DijkstraSP d = new DijkstraSP(rw.getP4Graph().get(EdgeWeightedDigraph.class), rw.getSource());
+
+            if (d.hasPathTo(rw.getSink())) {
+                Iterator<DirectedEdge> iterator = d.pathTo(rw.getSink()).iterator();
+                int countRed = getCountRed(rw, iterator);
+                return String.valueOf(countRed);
+            }
+        } else {
+            DijkstraUndirectedSP d = new DijkstraUndirectedSP(rw.getP4Graph().get(EdgeWeightedGraph.class), rw.getSource());
+
+            if (d.hasPathTo(rw.getSink())) {
+                Iterator<Edge> iterator = d.pathTo(rw.getSink()).iterator();
+                int countRed = getCountRedUndir(rw, iterator);
+                return String.valueOf(countRed);
+            }
+
+        }
+
+        return "-";
+
+    }
+
 
     public static List<String> getInputs() {
         try {

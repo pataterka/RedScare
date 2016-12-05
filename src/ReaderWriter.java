@@ -1,7 +1,4 @@
-import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.DirectedEdge;
-import edu.princeton.cs.algs4.EdgeWeightedDigraph;
-import edu.princeton.cs.algs4.Graph;
+import edu.princeton.cs.algs4.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,20 +14,22 @@ public class ReaderWriter {
     private int m;
     private int r;
     private int source;
+    private int p2newSource;
+    private int p2newSink;
     private int sink;
     private String vName;
     private String childName;
     private String sign;
-    private MyGraph p1Graph;
-    private MyGraph p3Graph;
-
-    //public ArrayList<String> vertices = new ArrayList<>();
     private Set<Integer> redVertices = new HashSet<>();
+    private MyGraph p1Graph;
+    private MyGraph p2Graph;
+    private MyGraph p3Graph;
+    private MyGraph p4Graph;
 
 
     public ReaderWriter(String filePath) {
         try {
-           // sc = new Scanner(new File(filePath));
+            // sc = new Scanner(new File(filePath));
             sc = new Scanner(new File(ReaderWriter.class.getResource(filePath).toURI()));
         } catch (FileNotFoundException | URISyntaxException e) {
             System.out.println("Error: Could not find the file specified. Exiting...");
@@ -55,8 +54,16 @@ public class ReaderWriter {
         return p1Graph;
     }
 
+    public MyGraph getP2Graph() {
+        return p2Graph;
+    }
+
     public MyGraph getP3Graph() {
         return p3Graph;
+    }
+
+    public MyGraph getP4Graph() {
+        return p4Graph;
     }
 
     public Set<Integer> getRedVertices() {
@@ -67,8 +74,16 @@ public class ReaderWriter {
         return source;
     }
 
+    public int getP2newSource() {
+        return p2newSource;
+    }
+
     public int getSink() {
         return sink;
+    }
+
+    public int getP2newSink() {
+        return p2newSink;
     }
 
     public void initialize() {
@@ -88,13 +103,13 @@ public class ReaderWriter {
             nameToIndex.put(vName, i);
 
             //vertices.add(vName);
-            if (!sc.hasNext()){
+            if (!sc.hasNext()) {
                 break;
             }
             String next = sc.next();
             if (next.equals("*")) {
                 redVertices.add(i);
-                if (!sc.hasNext()){
+                if (!sc.hasNext()) {
                     break;
                 }
                 vName = sc.next();
@@ -105,19 +120,41 @@ public class ReaderWriter {
 
         source = nameToIndex.get(sourceName);
         sink = nameToIndex.get(sinkName);
+        p2newSource = n;
+        p2newSink = n + 1;
 
         if (sc.hasNext()) {
             sign = sc.next();
             if (sign.equals("--")) {
+
                 Graph g = new Graph(n);
-                p1Graph = new MyGraph(false, g);
-                p3Graph = new MyGraph(false, null);
+                p1Graph = new MyGraph(false, false, g);
+
+                FlowNetwork g2 = new FlowNetwork(n + 2);
+                p2Graph = new MyGraph(false, false, g2);
+
+                p3Graph = new MyGraph(false, false, null);
+
+                EdgeWeightedGraph g4 = new EdgeWeightedGraph(n);
+                p4Graph = new MyGraph(false, false, g4);
+
+
                 childName = sc.next();
                 for (; ; ) {
                     if (!canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
                         g.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
 
+
                     }
+
+                    FlowEdge g2edge = new FlowEdge(nameToIndex.get(vName),
+                            nameToIndex.get(childName), 1);
+                    g2.addEdge(g2edge);
+
+                    Edge g4edge = new Edge(nameToIndex.get(vName),
+                            nameToIndex.get(childName),
+                            redVertices.contains(nameToIndex.get(childName)) ? 1 : 0);
+                    g4.addEdge(g4edge);
 
                     if (sc.hasNext()) {
                         vName = sc.next();
@@ -127,12 +164,22 @@ public class ReaderWriter {
 
                 }
 
+
+                FlowEdge e1 = new FlowEdge(p2newSource, source, 1);
+                FlowEdge e2 = new FlowEdge(p2newSource, sink, 1);
+                g2.addEdge(e1);
+                g2.addEdge(e2);
+
+
             } else {
                 Digraph g1 = new Digraph(n);
                 EdgeWeightedDigraph g3 = new EdgeWeightedDigraph(n);
+                EdgeWeightedDigraph g4 = new EdgeWeightedDigraph(n);
 
-                p1Graph = new MyGraph(true, g1);
-                p3Graph = new MyGraph(true, g3);
+                p1Graph = new MyGraph(true, false, g1);
+                p2Graph = new MyGraph(false, true, new FlowNetwork(0));
+                p3Graph = new MyGraph(true, false, g3);
+                p4Graph = new MyGraph(true, false, g4);
                 childName = sc.next();
 
                 for (; ; ) {
@@ -141,9 +188,13 @@ public class ReaderWriter {
 
                     }
                     DirectedEdge g3edge = new DirectedEdge(nameToIndex.get(vName), nameToIndex.get(childName),
-                            redVertices.contains(nameToIndex.get(childName))? -1 : 0);
+                            redVertices.contains(nameToIndex.get(childName)) ? -1 : 0);
+
+                    DirectedEdge g4edge = new DirectedEdge(nameToIndex.get(vName), nameToIndex.get(childName),
+                            redVertices.contains(nameToIndex.get(childName)) ? 1 : 0);
 
                     g3.addEdge(g3edge);
+                    g4.addEdge(g4edge);
 
                     if (sc.hasNext()) {
                         vName = sc.next();
@@ -153,9 +204,10 @@ public class ReaderWriter {
                 }
 
             }
-        }
-        else {
-            p1Graph = new MyGraph(false, new Graph(0));
+        } else {
+            p1Graph = new MyGraph(false, true, new Graph(0));
+            p2Graph = new MyGraph(false, true, new FlowNetwork(0));
+            p4Graph = new MyGraph(false, true, new EdgeWeightedGraph(0));
         }
     }
 }
