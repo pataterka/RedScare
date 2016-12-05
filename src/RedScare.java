@@ -24,11 +24,20 @@ public class RedScare {
             ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i));
 
 
-            results.add(allFiles.get(i) + " " + none(rw) + " " + some(rw) + " " + many(rw) + " " + few(rw) + " ");
+            results.add(allFiles.get(i) + "\t" + rw.getN() + "\t" + alternate(rw) + "\t" + few(rw) + "\t" + none(rw) + "\t" + many(rw) + "\t" + some(rw));
 
 
         }
         results.forEach(System.out::println);
+        results.forEach(line -> {
+
+            if (Integer.parseInt(line.split("\t")[1])< 500){
+                return ;
+            }
+            line = line.replace("_", "\\_");
+            line = line.replace("\t", " & ");
+            System.out.println(line + "\\\\");
+        });
 
 
     }
@@ -73,7 +82,7 @@ public class RedScare {
                     FordFulkerson ff = new FordFulkerson(gCopy,
                             rw.getP2newSource(), rw.getP2newSink());
 
-                    if ( Math.round(ff.value()) == 2) {
+                    if (Math.round(ff.value()) == 2) {
                         return "true";
                     }
 
@@ -113,10 +122,14 @@ public class RedScare {
         Set<Integer> redSet = new HashSet<>();
 
         while (iterator.hasNext()) {
-            int nodeIndex = iterator.next().from();
+            DirectedEdge next = iterator.next();
+            int nodeIndex = next.from();
             if (rw.getRedVertices().contains(nodeIndex) && !redSet.contains(nodeIndex)) {
                 redSet.add(nodeIndex);
-
+            }
+            nodeIndex = next.to();
+            if (rw.getRedVertices().contains(nodeIndex) && !redSet.contains(nodeIndex)) {
+                redSet.add(nodeIndex);
 
             }
         }
@@ -124,13 +137,21 @@ public class RedScare {
     }
 
     private static int getCountRedUndir(ReaderWriter rw, Iterator<Edge> iterator) {
-        int countRed = 0;
+        Set<Integer> redSet = new HashSet<>();
+
         while (iterator.hasNext()) {
-            if (rw.getRedVertices().contains(iterator.next())) {
-                countRed++;
+            Edge next = iterator.next();
+            int nodeIndex = next.either();
+            if (rw.getRedVertices().contains(nodeIndex) && !redSet.contains(nodeIndex)) {
+                redSet.add(nodeIndex);
+            }
+            nodeIndex = next.other(nodeIndex);
+            if (rw.getRedVertices().contains(nodeIndex) && !redSet.contains(nodeIndex)) {
+                redSet.add(nodeIndex);
+
             }
         }
-        return countRed;
+        return redSet.size();
     }
 
     public static String few(ReaderWriter rw) {
@@ -158,6 +179,25 @@ public class RedScare {
 
         return "-";
 
+    }
+
+    public static String alternate(ReaderWriter rw) {
+        if (rw.getP5Graph().isEmpty()) return "false";
+
+        if (rw.getP5Graph().isDirected()) {
+
+            BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(rw.getP5Graph().get(Graph.class), rw.getSource());
+            if (bfs.hasPathTo(rw.getSink())) {
+                return "true";
+            }
+        } else {
+
+            BreadthFirstPaths bfs = new BreadthFirstPaths(rw.getP5Graph().get(Digraph.class), rw.getSource());
+            if (bfs.hasPathTo(rw.getSink())) {
+                return "true";
+            }
+        }
+        return "false";
     }
 
 

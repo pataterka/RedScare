@@ -25,6 +25,7 @@ public class ReaderWriter {
     private MyGraph p2Graph;
     private MyGraph p3Graph;
     private MyGraph p4Graph;
+    private MyGraph p5Graph;
 
 
     public ReaderWriter(String filePath) {
@@ -50,6 +51,13 @@ public class ReaderWriter {
 //                || redVertices.contains(w) && w!= source && w!= sink
     }
 
+    public boolean bothOrNoneRed(int v, int w) {
+        if (redVertices.contains(v) && redVertices.contains(w) ||
+                !redVertices.contains(v) && !redVertices.contains(w)) {
+            return true;
+        } else return false;
+    }
+
     public MyGraph getP1Graph() {
         return p1Graph;
     }
@@ -64,6 +72,10 @@ public class ReaderWriter {
 
     public MyGraph getP4Graph() {
         return p4Graph;
+    }
+
+    public MyGraph getP5Graph() {
+        return p5Graph;
     }
 
     public Set<Integer> getRedVertices() {
@@ -84,6 +96,10 @@ public class ReaderWriter {
 
     public int getP2newSink() {
         return p2newSink;
+    }
+
+    public int getN() {
+        return n;
     }
 
     public void initialize() {
@@ -138,13 +154,19 @@ public class ReaderWriter {
                 EdgeWeightedGraph g4 = new EdgeWeightedGraph(n);
                 p4Graph = new MyGraph(false, false, g4);
 
+                Graph g5 = new Graph(n);
+                p5Graph = new MyGraph(false, false, g5);
+
 
                 childName = sc.next();
                 for (; ; ) {
                     if (!canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
                         g.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
 
+                    }
 
+                    if (!bothOrNoneRed(nameToIndex.get(vName), nameToIndex.get(childName))) {
+                        g5.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
                     }
 
                     FlowEdge g2edge1 = new FlowEdge(nameToIndex.get(vName),
@@ -178,11 +200,13 @@ public class ReaderWriter {
                 Digraph g1 = new Digraph(n);
                 EdgeWeightedDigraph g3 = new EdgeWeightedDigraph(n);
                 EdgeWeightedDigraph g4 = new EdgeWeightedDigraph(n);
+                Digraph g5 = new Digraph(n);
 
                 p1Graph = new MyGraph(true, false, g1);
                 p2Graph = new MyGraph(false, true, new FlowNetwork(0));
                 p3Graph = new MyGraph(true, false, g3);
                 p4Graph = new MyGraph(true, false, g4);
+                p5Graph = new MyGraph(true, false, g5);
                 childName = sc.next();
 
                 for (; ; ) {
@@ -190,6 +214,11 @@ public class ReaderWriter {
                         g1.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
 
                     }
+
+                    if (!bothOrNoneRed(nameToIndex.get(vName), nameToIndex.get(childName))) {
+                        g5.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
+                    }
+
                     DirectedEdge g3edge = new DirectedEdge(nameToIndex.get(vName), nameToIndex.get(childName),
                             redVertices.contains(nameToIndex.get(childName)) ? -1 : 0);
 
@@ -211,6 +240,7 @@ public class ReaderWriter {
             p1Graph = new MyGraph(false, true, new Graph(0));
             p2Graph = new MyGraph(false, true, new FlowNetwork(0));
             p4Graph = new MyGraph(false, true, new EdgeWeightedGraph(0));
+            p5Graph = new MyGraph(false, true, new Graph(0));
         }
     }
 }
