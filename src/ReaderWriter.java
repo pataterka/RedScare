@@ -1,4 +1,6 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedEdge;
+import edu.princeton.cs.algs4.EdgeWeightedDigraph;
 import edu.princeton.cs.algs4.Graph;
 
 import java.io.File;
@@ -20,12 +22,13 @@ public class ReaderWriter {
     private String childName;
     private String sign;
     private MyGraph p1Graph;
+    private MyGraph p3Graph;
 
-    public ArrayList<String> vertices = new ArrayList<>();
-    public Set<Integer> redVertices = new HashSet<>();
+    //public ArrayList<String> vertices = new ArrayList<>();
+    private Set<Integer> redVertices = new HashSet<>();
 
 
-    public ReaderWriter(String filePath, boolean ignoreRed) {
+    public ReaderWriter(String filePath) {
         try {
            // sc = new Scanner(new File(filePath));
             sc = new Scanner(new File(ReaderWriter.class.getResource(filePath).toURI()));
@@ -34,7 +37,7 @@ public class ReaderWriter {
             System.exit(0);
         }
 
-        initialize(ignoreRed);
+        initialize();
     }
 
 
@@ -52,6 +55,14 @@ public class ReaderWriter {
         return p1Graph;
     }
 
+    public MyGraph getP3Graph() {
+        return p3Graph;
+    }
+
+    public Set<Integer> getRedVertices() {
+        return redVertices;
+    }
+
     public int getSource() {
         return source;
     }
@@ -60,7 +71,7 @@ public class ReaderWriter {
         return sink;
     }
 
-    public void initialize(boolean ignoreRed) {
+    public void initialize() {
 
         n = sc.nextInt();
         m = sc.nextInt();
@@ -76,7 +87,7 @@ public class ReaderWriter {
 
             nameToIndex.put(vName, i);
 
-            vertices.add(vName);
+            //vertices.add(vName);
             if (!sc.hasNext()){
                 break;
             }
@@ -100,13 +111,12 @@ public class ReaderWriter {
             if (sign.equals("--")) {
                 Graph g = new Graph(n);
                 p1Graph = new MyGraph(false, g);
+                p3Graph = new MyGraph(false, null);
                 childName = sc.next();
                 for (; ; ) {
-                    if (ignoreRed && canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
-
-                    }
-                    else {
+                    if (!canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
                         g.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
+
                     }
 
                     if (sc.hasNext()) {
@@ -118,17 +128,22 @@ public class ReaderWriter {
                 }
 
             } else {
-                Digraph g = new Digraph(n);
-                p1Graph = new MyGraph(true, g);
+                Digraph g1 = new Digraph(n);
+                EdgeWeightedDigraph g3 = new EdgeWeightedDigraph(n);
+
+                p1Graph = new MyGraph(true, g1);
+                p3Graph = new MyGraph(true, g3);
                 childName = sc.next();
 
                 for (; ; ) {
-                    if (ignoreRed && canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
+                    if (!canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
+                        g1.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
 
                     }
-                    else {
-                        g.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
-                    }
+                    DirectedEdge g3edge = new DirectedEdge(nameToIndex.get(vName), nameToIndex.get(childName),
+                            redVertices.contains(nameToIndex.get(childName))? -1 : 0);
+
+                    g3.addEdge(g3edge);
 
                     if (sc.hasNext()) {
                         vName = sc.next();

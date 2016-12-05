@@ -1,13 +1,12 @@
-import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
-import edu.princeton.cs.algs4.BreadthFirstPaths;
-import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.Graph;
+import edu.princeton.cs.algs4.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -22,11 +21,11 @@ public class RedScare {
 
         List<String> allFiles = getInputs();
         for (int i = 0; i < allFiles.size(); i++) {
-            System.out.println(allFiles.get(i));
-            ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i), true);
+            System.out.print(allFiles.get(i));
+            ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i));
             //none(rw);
 
-            System.out.println(none(rw));
+            System.out.println("\t"+ none(rw)+" " +many(rw));
         }
 
     }
@@ -54,15 +53,42 @@ public class RedScare {
         return "-";
     }
 
-        public static List<String> getInputs () {
-            try {
-                Path p = Paths.get(RedScare.class.getResource("data").toURI());
-                return Files.list(p)
-                        .map((Path x) -> x.toFile().getName())
-                        .sorted()
-                        .collect(Collectors.toList());
-            } catch (URISyntaxException | IOException e) {
-                throw new RuntimeException(null, e);
+    public static String many(ReaderWriter rw) {
+        if (rw.getP1Graph().isDirected()) {
+
+            BellmanFordSP bf = new BellmanFordSP(rw.getP3Graph().get(EdgeWeightedDigraph.class), rw.getSource());
+            if (!bf.hasNegativeCycle()) {
+                if (bf.hasPathTo(rw.getSink())) {
+                    Iterable<DirectedEdge> path = bf.pathTo(rw.getSink());
+                    Iterator<DirectedEdge> iterator = path.iterator();
+                    int countRed = 0;
+                    while (iterator.hasNext()) {
+                        if (rw.getRedVertices().contains(iterator.next())) {
+                            countRed++;
+                        }
+                    }
+                    return String.valueOf(countRed);
+                } else {
+                    return "-";
+                }
             }
+
+
+        }
+
+        return "?";
+
+    }
+
+    public static List<String> getInputs() {
+        try {
+            Path p = Paths.get(RedScare.class.getResource("data").toURI());
+            return Files.list(p)
+                    .map((Path x) -> x.toFile().getName())
+                    .sorted()
+                    .collect(Collectors.toList());
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(null, e);
         }
     }
+}
