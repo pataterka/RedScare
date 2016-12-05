@@ -147,9 +147,12 @@ public class ReaderWriter {
 
                     }
 
-                    FlowEdge g2edge = new FlowEdge(nameToIndex.get(vName),
+                    FlowEdge g2edge1 = new FlowEdge(nameToIndex.get(vName),
                             nameToIndex.get(childName), 1);
-                    g2.addEdge(g2edge);
+                    FlowEdge g2edge2 = new FlowEdge(nameToIndex.get(childName),
+                            nameToIndex.get(vName), 1);
+                    g2.addEdge(g2edge1);
+                    g2.addEdge(g2edge2);
 
                     Edge g4edge = new Edge(nameToIndex.get(vName),
                             nameToIndex.get(childName),

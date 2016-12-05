@@ -5,9 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -112,13 +110,17 @@ public class RedScare {
     }
 
     private static int getCountRed(ReaderWriter rw, Iterator<DirectedEdge> iterator) {
-        int countRed = 0;
+        Set<Integer> redSet = new HashSet<>();
+
         while (iterator.hasNext()) {
-            if (rw.getRedVertices().contains(iterator.next())) {
-                countRed++;
+            int nodeIndex = iterator.next().from();
+            if (rw.getRedVertices().contains(nodeIndex) && !redSet.contains(nodeIndex)) {
+                redSet.add(nodeIndex);
+
+
             }
         }
-        return countRed;
+        return redSet.size();
     }
 
     private static int getCountRedUndir(ReaderWriter rw, Iterator<Edge> iterator) {
