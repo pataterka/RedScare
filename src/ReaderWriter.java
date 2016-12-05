@@ -68,21 +68,30 @@ public class ReaderWriter {
         String sourceName = sc.next();
         String sinkName = sc.next();
 
-        vName = sc.next();
+
         Map<String, Integer> nameToIndex = new HashMap<>();
+        vName = sc.next();
 
         for (int i = 0; i < n; i++) {
+
             nameToIndex.put(vName, i);
 
             vertices.add(vName);
+            if (!sc.hasNext()){
+                break;
+            }
             String next = sc.next();
             if (next.equals("*")) {
                 redVertices.add(i);
+                if (!sc.hasNext()){
+                    break;
+                }
                 vName = sc.next();
             } else {
                 vName = next;
             }
         }
+
         source = nameToIndex.get(sourceName);
         sink = nameToIndex.get(sinkName);
 
@@ -106,7 +115,6 @@ public class ReaderWriter {
                         childName = sc.next();
                     } else break;
 
-                    System.out.println(vName + " "+ childName);
                 }
 
             } else {
@@ -130,6 +138,9 @@ public class ReaderWriter {
                 }
 
             }
+        }
+        else {
+            p1Graph = new MyGraph(false, new Graph(0));
         }
     }
 }

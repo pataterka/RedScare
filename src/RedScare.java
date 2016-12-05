@@ -17,49 +17,52 @@ import java.util.stream.Collectors;
  */
 public class RedScare {
 
-    public static void main (String[] args){
-
+    public static void main(String[] args) {
 
 
         List<String> allFiles = getInputs();
-        for (int i=0; i< allFiles.size(); i++) {
+        for (int i = 0; i < allFiles.size(); i++) {
             System.out.println(allFiles.get(i));
-            ReaderWriter rw = new ReaderWriter("data/"+allFiles.get(i), true);
+            ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i), true);
             //none(rw);
-            System.out.println(allFiles.get(i));
+
             System.out.println(none(rw));
         }
 
     }
 
-    public static String none (ReaderWriter rw){
-        if (rw.getP1Graph().isDirected()){
+    public static String none(ReaderWriter rw) {
+        try {
+            if (rw.getP1Graph().isDirected()) {
 
-            BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(rw.getP1Graph().get(Graph.class), rw.getSource());
-            if (bfs.hasPathTo(rw.getSink())){
-                return String.valueOf(bfs.distTo(rw.getSink()));
-            }
-        }
-        else {
-            BreadthFirstPaths bfs = new BreadthFirstPaths(rw.getP1Graph().get(Digraph.class), rw.getSource());
-            if (bfs.hasPathTo(rw.getSink())){
-                return String.valueOf(bfs.distTo(rw.getSink()));
-            }
-        }
+                BreadthFirstDirectedPaths bfs = new BreadthFirstDirectedPaths(rw.getP1Graph().get(Graph.class), rw.getSource());
+                if (bfs.hasPathTo(rw.getSink())) {
+                    return String.valueOf(bfs.distTo(rw.getSink()));
+                }
+            } else {
 
+                BreadthFirstPaths bfs = new BreadthFirstPaths(rw.getP1Graph().get(Digraph.class), rw.getSource());
+                if (bfs.hasPathTo(rw.getSink())) {
+                    return String.valueOf(bfs.distTo(rw.getSink()));
+                }
+            }
+
+
+        } catch (RuntimeException e) {
+
+        }
         return "-";
     }
 
-    public static List <String> getInputs (){
-        try {
-            Path p = Paths.get(RedScare.class.getResource("data").toURI());
-            return Files.list(p)
-                    .map((Path x) -> x.toFile().getName())
-                    .sorted()
-                    .collect(Collectors.toList());
-        }
-        catch (URISyntaxException | IOException e){
-            throw new RuntimeException(null, e);
+        public static List<String> getInputs () {
+            try {
+                Path p = Paths.get(RedScare.class.getResource("data").toURI());
+                return Files.list(p)
+                        .map((Path x) -> x.toFile().getName())
+                        .sorted()
+                        .collect(Collectors.toList());
+            } catch (URISyntaxException | IOException e) {
+                throw new RuntimeException(null, e);
+            }
         }
     }
-}
