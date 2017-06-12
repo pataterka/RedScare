@@ -6,8 +6,9 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 /**
- * Created by Pati on 05.12.2016.
+ * Created by Pati
  */
+
 public class ReaderWriter {
     private Scanner sc;
     private int n;
@@ -118,7 +119,6 @@ public class ReaderWriter {
 
             nameToIndex.put(vName, i);
 
-            //vertices.add(vName);
             if (!sc.hasNext()) {
                 break;
             }
@@ -143,8 +143,8 @@ public class ReaderWriter {
             sign = sc.next();
             if (sign.equals("--")) {
 
-                Graph g = new Graph(n);
-                p1Graph = new MyGraph(false, false, g);
+                Graph g1 = new Graph(n);
+                p1Graph = new MyGraph(false, false, g1);
 
                 FlowNetwork g2 = new FlowNetwork(n + 2);
                 p2Graph = new MyGraph(false, false, g2);
@@ -161,7 +161,7 @@ public class ReaderWriter {
                 childName = sc.next();
                 for (; ; ) {
                     if (!canIgnore(nameToIndex.get(vName), nameToIndex.get(childName))) {
-                        g.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
+                        g1.addEdge(nameToIndex.get(vName), nameToIndex.get(childName));
 
                     }
 

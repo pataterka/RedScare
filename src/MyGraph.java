@@ -1,8 +1,9 @@
 import edu.princeton.cs.algs4.Graph;
 
 /**
- * Created by Pati on 05.12.2016.
+ * Created by Pati
  */
+
 public class MyGraph {
     boolean directed;
     boolean empty;

@@ -9,8 +9,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by Pati on 05.12.2016.
+ * Created by Pati
  */
+
 public class RedScare {
 
     public static void main(String[] args) {
@@ -20,19 +21,19 @@ public class RedScare {
         List<String> results = new ArrayList<>();
 
         for (int i = 0; i < allFiles.size(); i++) {
-            // System.out.print(allFiles.get(i));
+
             ReaderWriter rw = new ReaderWriter("data/" + allFiles.get(i));
 
 
-            results.add(allFiles.get(i) + "\t" + rw.getN() + "\t" + alternate(rw) + "\t" + few(rw) + "\t" + none(rw) + "\t" + many(rw) + "\t" + some(rw));
+            results.add(allFiles.get(i) + "\t" + rw.getN() + "\t" + alternate(rw) + "\t" + few(rw) + "\t" + many(rw) + "\t" + none(rw)  + "\t" + some(rw));
 
 
         }
         results.forEach(System.out::println);
         results.forEach(line -> {
 
-            if (Integer.parseInt(line.split("\t")[1])< 500){
-                return ;
+            if (Integer.parseInt(line.split("\t")[1]) < 500) {
+                return;
             }
             line = line.replace("_", "\\_");
             line = line.replace("\t", " & ");
@@ -110,8 +111,6 @@ public class RedScare {
                     return "-";
                 }
             }
-
-
         }
 
         return "?";
